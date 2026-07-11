@@ -85,18 +85,24 @@ def generate_answer(question: str, model_dir: str = DEFAULT_MODEL_DIR, max_new_t
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},
     ]
-    prompt = tokenizer.apply_chat_template(convo, tokenize=False, add_generation_prompt=True)
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    # Tokenize directly through apply_chat_template (tokenize=True) instead of
+    # rendering to a string and re-tokenizing it separately - re-tokenizing a
+    # rendered template string can produce a different token count than what
+    # was actually fed to generate(), which then makes the prompt-length slice
+    # below cut into the prompt itself instead of the new tokens.
+    input_ids = tokenizer.apply_chat_template(
+        convo, tokenize=True, add_generation_prompt=True, return_tensors="pt"
+    ).to(model.device)
 
     out = model.generate(
-        **inputs,
+        input_ids=input_ids,
         max_new_tokens=max_new_tokens,
         do_sample=True,
         temperature=0.7,
         top_p=0.9,
         pad_token_id=tokenizer.eos_token_id,
     )
-    answer = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+    answer = tokenizer.decode(out[0][input_ids.shape[1]:], skip_special_tokens=True)
     return answer.strip()
 
 
