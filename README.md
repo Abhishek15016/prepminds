@@ -126,12 +126,12 @@ disk between sessions — so `models/non_instruction_adapter/` from Stage 1
 won't exist by the time you open a new session for Stage 2 unless you carry
 it over yourself. Every notebook has an optional **Step 0** cell for this:
 
-1. Set `HF_USERNAME` in that cell to your Hugging Face username.
+1. `HF_USERNAME` is already set to `abhishek15016` in that cell (change it if pushing under a different account).
 2. Add a Colab secret named `HF_TOKEN` (key icon in the left sidebar) holding
    a Hugging Face token with **write** access — this lets `login()` run
    without an interactive prompt.
 3. Each notebook then automatically pushes its adapter to
-   `<HF_USERNAME>/qwen2.5-0.5b-genai-agentic-stage{1,2,3}-...` (private by
+   `abhishek15016/qwen2.5-0.5b-genai-agentic-stage{1,2,3}-...` (private by
    default) after training, and the *next* notebook automatically pulls from
    the Hub if no local copy is found — no manual zip/download/upload needed.
 
@@ -142,7 +142,7 @@ save/reopen a single persistent Colab runtime / mounted Drive).
 `src/inference.py` accepts a Hub repo id directly, so you can point it at the
 final pushed model from anywhere:
 ```bash
-python src/inference.py -q "What is LoRA?" --model <hf-username>/qwen2.5-0.5b-genai-agentic-stage3-dpo
+python src/inference.py -q "What is LoRA?" --model abhishek15016/qwen2.5-0.5b-genai-agentic-stage3-dpo
 ```
 
 The evaluation reports (`base_model_evaluation.md`, `sft_model_comparison.md`,

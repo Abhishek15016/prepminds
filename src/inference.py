@@ -6,7 +6,7 @@ Usage:
     python src/inference.py                                  # interactive REPL
     python src/inference.py -q "What is LoRA?"                # one-shot question
     python src/inference.py -q "What is LoRA?" --model models/sft_adapter
-    python src/inference.py -q "What is LoRA?" --model <hf-username>/qwen2.5-0.5b-genai-agentic-stage3-dpo
+    python src/inference.py -q "What is LoRA?" --model abhishek15016/qwen2.5-0.5b-genai-agentic-stage3-dpo
 
 As a library:
     from src.inference import generate_answer
