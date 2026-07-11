@@ -108,7 +108,12 @@ hyperparameter used) is in
    1. `notebooks/non_instruction_finetuning.ipynb` -> `models/non_instruction_adapter/`, `reports/base_model_evaluation.md`
    2. `notebooks/instruction_finetuning.ipynb` -> `models/sft_adapter/`, `reports/sft_model_comparison.md`
    3. `notebooks/dpo_alignment.ipynb` -> `models/dpo_adapter/`, `reports/final_evaluation.md`
-3. Query the final model:
+3. If a Colab session ended before you downloaded `base_model_evaluation.md` or
+   `sft_model_comparison.md` (Colab's disk doesn't persist between sessions),
+   run `notebooks/regenerate_reports.ipynb` — it rebuilds both from the base
+   checkpoint and the Stage 2 adapter pushed to the Hugging Face Hub, with no
+   need to re-run training.
+4. Query the final model:
    ```bash
    python src/inference.py -q "What is LoRA?"
    ```
