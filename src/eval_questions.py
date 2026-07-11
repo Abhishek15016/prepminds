@@ -55,16 +55,43 @@ def _domain_hit_count(text: str) -> int:
     return sum(1 for kw in _DOMAIN_KEYWORDS if kw in low)
 
 
+def _is_degenerate(text: str) -> bool:
+    """Detect repetition-collapse generation (a real failure mode for a small,
+    lightly-trained model): the same word/phrase looping, or the same raw
+    substring recurring - including the no-whitespace-separator case, e.g.
+    'NoOneCanDenyThis.NoOneCanDenyThis....' """
+    # Raw substring check first (independent of word count): catches loops
+    # with no word-boundary separators, e.g. 'NoOneCanDenyThis.NoOneCanDenyThis...'
+    # which .split() would otherwise collapse into one giant "word".
+    if re.search(r"(.{5,60})\1{2,}", text):
+        return True
+    words = text.split()
+    if len(words) < 6:
+        return False
+    if len(set(w.lower() for w in words)) < len(words) * 0.35:
+        return True
+    run = max_run = 1
+    for i in range(1, len(words)):
+        if words[i].lower() == words[i - 1].lower():
+            run += 1
+            max_run = max(max_run, run)
+        else:
+            run = 1
+    if max_run >= 4:
+        return True
+    return False
+
+
 def judge_base_answer(question: str, answer: str) -> str:
     """Heuristic first draft for the 'Problem' column in base_model_evaluation.md."""
     low = answer.lower()
     words = len(answer.split())
     if any(p in low for p in _GENERIC_PHRASES) or words < 8:
         return "Generic / evasive - the base model gives almost no usable domain content."
+    if _is_degenerate(answer):
+        return "Degenerate / repetition loop - the model gets stuck looping a word or phrase instead of giving a structured, direct answer."
     if _domain_hit_count(answer) == 0:
         return "Off-topic or superficial - misses the core GenAI/Agentic-AI terminology the question is asking about."
-    if len(set(answer.split())) < words * 0.55:
-        return "Repetitive / rambling - the base model loops instead of giving a structured, direct answer."
     return "Shallow and unstructured - technically adjacent but lacks the depth, correct terminology, and interview-ready framing a domain expert would give."
 
 
@@ -72,7 +99,16 @@ def judge_pair(question: str, a_name: str, a_answer: str, b_name: str, b_answer:
     """Heuristic first draft for a 'Which is better / Reason' style column.
     Returns (winner_name, reason). Prefers the answer with denser correct
     domain vocabulary and less repetition; ties break toward the later stage
-    model, matching the expected effect of additional fine-tuning."""
+    model, matching the expected effect of additional fine-tuning. A
+    degenerate/looping answer (see _is_degenerate) is never preferred over a
+    coherent one purely for being long or keyword-dense."""
+    a_degenerate = _is_degenerate(a_answer)
+    b_degenerate = _is_degenerate(b_answer)
+    if a_degenerate and not b_degenerate:
+        return b_name, f"{a_name}'s answer degenerates into a repetition loop; {b_name} stays coherent."
+    if b_degenerate and not a_degenerate:
+        return a_name, f"{b_name}'s answer degenerates into a repetition loop; {a_name} stays coherent."
+
     score_a = _domain_hit_count(a_answer) + len(a_answer.split()) / 40
     score_b = _domain_hit_count(b_answer) + len(b_answer.split()) / 40
     if any(p in a_answer.lower() for p in _GENERIC_PHRASES) or len(a_answer.split()) < 8:

@@ -100,7 +100,7 @@ def generate_answer(question: str, model_dir: str = DEFAULT_MODEL_DIR, max_new_t
         do_sample=True,
         temperature=0.7,
         top_p=0.9,
-        repetition_penalty=1.2,
+        repetition_penalty=1.3,
         pad_token_id=tokenizer.eos_token_id,
     )
     answer = tokenizer.decode(out[0][input_ids.shape[1]:], skip_special_tokens=True)
