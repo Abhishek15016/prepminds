@@ -1,0 +1,15 @@
+# Core fine-tuning stack (run on a CUDA GPU - e.g. free Colab/Kaggle T4)
+unsloth
+unsloth_zoo
+trl>=0.12.0
+peft
+accelerate
+bitsandbytes
+transformers
+datasets
+sentencepiece
+huggingface_hub
+
+# Notebook execution
+ipykernel
+jupyter

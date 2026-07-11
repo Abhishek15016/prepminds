@@ -1,0 +1,20 @@
+# Trained adapters / checkpoints (regenerate by running the notebooks)
+models/*
+!models/.gitkeep
+outputs/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Env
+.venv/
+venv/
+
+# Editor / tool config (not part of the project)
+.vscode/
+
+# Assignment brief / course source material (not a project deliverable)
+Practical Fine-Tuning Assignment-04.docx
+GENAI-AGENTIC AI.txt
